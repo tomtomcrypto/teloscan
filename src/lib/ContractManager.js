@@ -42,16 +42,20 @@ export default class ContractManager {
             return new ethers.utils.Interface([this.functionInterfaces[prefix]]);
 
 
-        const abiResponse = await this.evmEndpoint.get(`/v2/evm/get_abi_signature?type=function&hex=${prefix}`)
-        if (abiResponse) {
-            if (!abiResponse.data || !abiResponse.data.text_signature || abiResponse.data.text_signature === '') {
-                console.error(`Unable to find function signature for sig: ${prefix}`);
-                return;
-            }
+        try {
+            const abiResponse = await this.evmEndpoint.get(`/v2/evm/get_abi_signature?type=function&hex=${prefix}`)
+            if (abiResponse) {
+                if (!abiResponse.data || !abiResponse.data.text_signature || abiResponse.data.text_signature === '') {
+                    console.error(`Unable to find function signature for sig: ${prefix}`);
+                    return;
+                }
 
-            const iface = new ethers.utils.Interface([`function ${abiResponse.data.text_signature}`]);
-            this.functionInterfaces[prefix] = iface;
-            return iface;
+                const iface = new ethers.utils.Interface([`function ${abiResponse.data.text_signature}`]);
+                this.functionInterfaces[prefix] = iface;
+                return iface;
+            }
+        } catch (e) {
+            console.log(e)
         }
     }
 
@@ -84,7 +88,7 @@ export default class ContractManager {
     }
 
     // suspectedToken is so we don't try to check for ERC20 info via eth_call unless we think this is a token...
-    //    this is coming from the token transfer page where we're looking for a contract based on a token transfer event
+    //  this is coming from the token transfer page where we're looking for a contract based on a token transfer event
     async getContract(address, suspectedToken) {
         if (!address) return;
         const addressLower = address.toLowerCase();
@@ -128,14 +132,11 @@ export default class ContractManager {
     }
 
     async getVerifiedContract(address, metadata, creationInfo) {
-        let token = await this.getToken(address);
-
         const contract = new Contract({
             name: Object.values(metadata.settings.compilationTarget)[0],
             address,
             abi: metadata.output.abi,
             manager: this,
-            token: token,
             creationInfo,
             verified: true,
         });

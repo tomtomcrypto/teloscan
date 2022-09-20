@@ -60,7 +60,7 @@ export default {
             }
             // This formats the address for us and handles zero padding we get from log events
             const address = ethers.utils.getAddress(this.address);
-            return this.truncate > 0 ? `${address.slice(0, this.truncate)}...` : address;
+            return this.truncate > 0 ? `${address.slice(0, this.truncate)}...${ this.truncate}` : address;
         },
         async loadContract() {
             this.contract = null;
