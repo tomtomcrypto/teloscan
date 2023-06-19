@@ -1,8 +1,10 @@
+import { boot } from 'quasar/wrappers';
 import { TelosEvmApi } from '@telosnetwork/telosevm-js';
 import ContractManager from 'src/lib/ContractManager';
 import fetch from 'node-fetch';
 import axios from 'axios';
 import { ethers } from 'ethers';
+import { markRaw } from 'vue';
 
 const evm = new TelosEvmApi({
     endpoint: process.env.NETWORK_EVM_ENDPOINT,
@@ -14,11 +16,11 @@ const evm = new TelosEvmApi({
 });
 
 // This is kinda bad, but if you try to store a web3 provider in the store, it has a call stack size exception,
-//    and if you freeze the provider before putting in the store so the call stack error goes away, you break the provider
-//    so, this is a workaround until some better solution is needed and/or available
+//    and if you freeze the provider before putting in the store so the call stack error goes away, you break
+//    the provider. so, this is a workaround until some better solution is needed and/or available
 const providerContainer = {
     provider: null,
-}
+};
 
 class ProviderManager {
     setProvider(provider) {
@@ -26,7 +28,9 @@ class ProviderManager {
     }
 
     getEthersProvider() {
-        return new ethers.providers.Web3Provider(providerContainer.provider, parseInt(process.env.NETWORK_EVM_CHAIN_ID, 10));
+        return new ethers.providers.Web3Provider(
+            providerContainer.provider, parseInt(process.env.NETWORK_EVM_CHAIN_ID, 10),
+        );
     }
 
     getProvider() {
@@ -41,11 +45,11 @@ const hyperion = axios.create({
 const contractManager = new ContractManager(hyperion);
 contractManager.init();
 
-export default ({ Vue, store }) => {
-    store.$providerManager = Vue.prototype.$providerManager = new ProviderManager();
-    store.$evm = Vue.prototype.$evm = evm;
-    store.$evmEndpoint = Vue.prototype.$evmEndpoint = hyperion;
-    store.$contractManager = Vue.prototype.$contractManager = contractManager;
-};
+export default boot(({ app, store }) => {
+    store.$providerManager = app.config.globalProperties.$providerManager = new ProviderManager();
+    store.$evm = app.config.globalProperties.$evm = evm;
+    store.$evmEndpoint = app.config.globalProperties.$evmEndpoint = hyperion;
+    store.$contractManager = app.config.globalProperties.$contractManager = markRaw(contractManager);
+});
 
 export { evm };

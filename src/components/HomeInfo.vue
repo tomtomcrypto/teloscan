@@ -1,11 +1,17 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import { ethers } from 'ethers';
+import exchangeImage from 'assets/exchange.png';
+import gasImage from 'assets/gas.png';
+import blockImage from 'assets/block.png';
 
 export default {
     name: 'HomeInfo',
     data: () => ({
         polling: false,
+        gasImage: gasImage,
+        exchangeImage: exchangeImage,
+        blockImage: blockImage,
     }),
     computed: {
         ...mapGetters('evm', ['tlosPrice', 'gasPrice', 'latestBlock']),
@@ -31,28 +37,67 @@ export default {
 };
 </script>
 
-<template lang='pug'>
-  .row.homeInfo
-    .col.q-pa-md
-      .row.items-center
-        .col-12.items-center
-          .column.items-center.text-subtitle2 TLOS Price
-        .col-12
-          .column.items-center.text-h6.text-weight-bold
-            | $ {{ tlosPrice }}
-    .col.q-pa-md
-      .row.items-center
-        .col-12.items-center
-          .column.items-center.text-subtitle2 Gas Price
-        .col-12
-          .column.items-center.text-h6.text-weight-bold
-            | {{ gasPriceGwei }} Gwei
-    .col.q-pa-md
-      .row.items-center
-        .col-12.items-center
-          .column.items-center.text-subtitle2
-            | Latest Block
-        .col-12
-          .column.items-center.text-h6.text-weight-bold
-            | {{ latestBlock }}
+<template>
+<div class="row homeInfo">
+    <div class="col q-pa-md">
+        <div class="row items-center">
+            <div class="col-2"></div>
+            <div class="col-2"><img :src="exchangeImage" width="40"></div>
+            <div class="col-8 q-pl-sm">
+                <div class="col-12">
+                    <div class="column text-subtitle2">{{ $t('components.tlos_price') }}</div>
+                </div>
+                <div class="col-12">
+                    <div class="column text-h6 text-weight-bold">$ {{ tlosPrice }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col q-pa-md">
+        <div class="row items-center">
+            <div class="col-2"></div>
+            <div class="col-2"><img :src="gasImage" width="40"></div>
+            <div class="col-8 q-pl-sm">
+                <div class="col-12">
+                    <div class="column text-subtitle2">{{ $t('components.gas_price') }}</div>
+                </div>
+                <div class="col-12">
+                    <div class="column text-h6 text-weight-bold">{{ gasPriceGwei }} {{ $t('components.gwei') }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col q-pa-md">
+        <div class="row items-center">
+            <div class="col-2"></div>
+            <div class="col-2"><img :src="blockImage" width="40"></div>
+            <div class="col-8 q-pl-sm">
+                <div class="col-12">
+                    <div class="column text-subtitle2">{{ $t('components.latest_block') }}</div>
+                </div>
+                <div class="col-12">
+                    <div class="column text-h6 text-weight-bold">{{ latestBlock }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </template>
+
+<style scoped lang="sass">
+.homeInfo
+    user-select: none
+@media screen and (max-width: 768px)
+    .homeInfo
+        .col-8
+            width: 100% !important
+            text-align: center
+            padding: 0
+        .col-2
+            width: 100% !important
+            text-align: center
+            padding: 0 0 5px 0
+            img
+                width: auto
+                height: 30px
+</style>
